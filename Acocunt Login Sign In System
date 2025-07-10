@@ -1,0 +1,191 @@
+#include<iostream>
+#include<string>
+#include<chrono>
+#include<thread>
+#include<atomic>
+#include<cmath>
+#include<vector>
+#include<map>
+#include<algorithm>
+#include<ctime>
+#include<fstream>
+#define RESET   "\033[0m"
+#define RED     "\033[1;31m"
+#define BLUE    "\033[1;34m"
+
+using namespace std;
+
+class login{
+private:
+    string username;
+    string password;
+
+public:
+
+    login(){
+        username = "";
+        password = "";
+    }
+
+    void set_data(string u, string p){
+        username = u;
+        password = p;
+    }
+
+    bool verification(string user, string pass){
+        return user == username && pass == password;
+    } 
+
+    void welcome_signin(){
+        cout<<"Sign In Successfull\n";
+    }
+
+    void welcome_login(){
+        cout<<"\nUsername and Password Correct\n";
+        cout<<"Login Successfull\n";
+    }
+
+    void change_pass(string new_pass){
+        cout<<"Before: "<<password<<endl;
+        password = new_pass;
+
+        cout<<"New: "<<password<<endl;
+    }       
+};
+
+bool contains_alphabet(string pass){
+    for(auto c : pass){
+        if(isalpha(c)) return true;
+    }
+    return false;
+}
+
+bool contains_digit(string pass){
+    for(auto c : pass){
+        if(isdigit(c)) return true;
+    }
+    return false;
+}
+
+void save_acc(string username, string password){
+    ofstream file("account.txt");
+        if(file.is_open()){
+            file << username <<endl;
+            file << password <<endl;
+            file.close();
+
+            cout<<"Saved Successfully\n";
+        }
+        else cout<<"Save Fail\n";
+}
+
+bool load_acc(string &username, string &password){
+    ifstream file ("account.txt");
+        if(!file.is_open()) return false;
+        else{
+            string flag;
+            file >> flag;
+            if(flag == "NEW") return false;
+            else file.putback(flag[0]);
+
+            getline(file >> ws, username);
+            getline(file >> ws, password);
+            
+            file.close();
+            return true;
+        }
+}
+
+void reset_acc(){
+    ofstream file("account.txt");
+        if(file.is_open()){
+            file << "NEW";
+            file.close();
+
+            cout<<"Reset Successfully\n";
+        }
+        else cout<<"Reset Fail\n";
+}
+
+int main(){
+    string username;
+    string input_user;
+    string input_pass;
+    string password;
+
+    login input;
+
+    cout<<"===Welcome to Login System===\n";
+
+    if(!load_acc(username, password)){
+        
+        cout<<"Enter Username to Sign In: ";
+        cin>>username;
+    
+        while(true){
+        cout<<"Enter Password to Sign In(3 Digits MIN & Contains Alphabet): ";
+        cin>>password;
+        if(password.length() >= 3 && contains_alphabet(password) 
+            && contains_digit(password)) {
+    
+            input.set_data(username, password);
+            input.welcome_signin();
+    
+            save_acc(username, password);
+            break;
+        }
+    
+        else cout<<"Password 3 Digits MIN and Password Must Contains Alphabet\n";
+        }
+    
+        cout<<"============================\n\n";
+        }
+    
+    else {
+        cout<<"Username and Password Loaded\n";
+        input.set_data(username, password);
+    }
+
+    int i = 0;
+    while(i < 3){
+        cout<<"\nEnter Username to Login: ";
+        cin>>input_user;
+        cout<<"Enter Password to Login: ";
+        cin>>input_pass;
+
+        if(input.verification(input_user, input_pass)){
+            input.welcome_login();
+            break;
+        }
+        else cout<<"Username or Password Wrong\n";
+
+        i++;
+        if(i == 3) cout<<"Attempts 0\n";
+    }
+
+    char option;
+    string new_password;
+
+    cout<<"Wanna Change the Password?(y/n): ";
+    cin>>option;
+
+    if(option == 'y'){
+        while(true){
+            cout<<"Enter Password to Sign In(3 Digits MIN & Contains Alphabet): ";
+            cin>>new_password;
+            if(new_password.length() >= 3 && contains_alphabet(new_password) 
+                && contains_digit(new_password)){
+
+                input.change_pass(new_password);
+                save_acc(username, new_password);
+                break;
+            }
+
+            else cout<<"New Password 3 Digits MIN and Password Must Contains Alphabet\n";
+            }
+    }
+    else return 0;
+
+    return 0;
+}
+
